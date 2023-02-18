@@ -26,6 +26,25 @@ def find_smallest_positive(xs):
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
+    if len(xs) == 0:
+        return None
+
+    def go(left, right):
+        if left == right:
+            if xs[left] > 0:
+                return left
+            else:
+                return None
+        mid = (left + right) // 2
+        if xs[mid] > 0:
+            right = mid
+        if xs[mid] <= 0:
+            left = mid + 1
+        if xs[mid] == 1:
+            return mid
+        return go(left, right)
+    
+    return go(0, len(xs) - 1)
 
 
 def count_repeats(xs, x):
@@ -52,6 +71,38 @@ def count_repeats(xs, x):
     >>> count_repeats([3, 2, 1], 4)
     0
     '''
+    if len(xs) == 0:
+        return 0
+
+    def find_high(left, right):
+        if right == left:
+            if right == len(xs) -1 and xs[right] > x:
+                return len(xs)
+            if xs[right] >= x:
+                return right
+            else:
+                return 0
+        mid = (left + right) // 2
+        if xs[mid] > x:
+            left = mid + 1
+        if xs[mid] <= x:
+            right = mid
+        return find_high(left, right)
+
+    def find_low(left, right):
+        if right == left:
+            if xs[right] < x:
+                return right
+            else:
+                return len(xs)
+        mid = (left + right) // 2
+        if xs[mid] >= x:
+            left = mid + 1
+        if xs[mid] < x:
+            right = mid
+        return find_low(left, right)
+
+    return find_low(0, len(xs) - 1) - find_high(0, len(xs) - 1)
 
 
 def argmin(f, lo, hi, epsilon=1e-3):
@@ -87,6 +138,19 @@ def argmin(f, lo, hi, epsilon=1e-3):
     >>> argmin(lambda x: (x-5)**2, -20, 0)
     -0.00016935087808430278
     '''
+    def go(left, right):
+        if right - left < epsilon:
+            return right
+        m1 = (2 * left + right) / 3
+        m2 = (left + 2 * right) / 3        
+        image = [f(left), f(m1), f(m2), f(right)]
+        if f(left) == min(image) or f(m1) == min(image):
+            return go(left, m2)
+        if f(m2) == min(image) or f(right) == min(image):
+            return go(m1, right)
+
+    return go(lo, hi)
+
 
 
 ################################################################################
@@ -109,6 +173,15 @@ def find_boundaries(f):
     else:
         you're done; return lo,hi
     '''
+    def go(left, right):
+        mid = (left + right) / 2
+        if f(left) < f(mid):
+            return go(2 * left, right)
+        elif f(right) < f(mid):
+            return go(left, 2 * right)
+        else:
+            return (left, right)
+    return go(-1, 1)
 
 
 def argmin_simple(f, epsilon=1e-3):
